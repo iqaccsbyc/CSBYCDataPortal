@@ -36,26 +36,43 @@ export const updateDocEncrypted = async (docRef, data) => {
  * Helper to check if a snapshot/doc contains unencrypted fields and update Firebase in the background
  */
 const autoMigrateDocIfNeeded = async (docSnap) => {
-  if (!docSnap.exists()) return;
-  const rawData = docSnap.data();
+  if (!docSnap || !docSnap.exists || !docSnap.exists()) return;
+  const rawData = typeof docSnap.data === 'function' ? docSnap.data() : docSnap.data;
+  if (!rawData) return;
   
-  // Check if any string field in rawData is NOT encrypted
+  // Excluded keys that stay plaintext for querying/routing
+  const EXCLUDED = new Set([
+    'id', 'docId', 'uid', 'createdAt', 'updatedAt', 'timestamp', 
+    'date', 'startDate', 'endDate', 'status', 'role', 'department', 
+    'academicYear', 'type', 'category', 'createdBy', 'stage'
+  ]);
+
   let hasUnencryptedField = false;
-  for (const [key, val] of Object.entries(rawData)) {
-    if (typeof val === 'string' && val.length > 0 && !isEncrypted(val) && key !== 'id' && key !== 'docId') {
-      hasUnencryptedField = true;
-      break;
+
+  const checkUnencrypted = (obj) => {
+    if (!obj || typeof obj !== 'object') return;
+    for (const [key, val] of Object.entries(obj)) {
+      if (EXCLUDED.has(key)) continue;
+      if (typeof val === 'string' && val.trim().length > 0 && !isEncrypted(val)) {
+        hasUnencryptedField = true;
+        return;
+      } else if (typeof val === 'object' && val !== null && !(val.seconds !== undefined) && !(val instanceof Date)) {
+        checkUnencrypted(val);
+        if (hasUnencryptedField) return;
+      }
     }
-  }
+  };
+
+  checkUnencrypted(rawData);
 
   // If old unencrypted data is detected, re-save it encrypted in the background!
   if (hasUnencryptedField) {
     try {
       const encryptedPayload = encryptData(rawData);
       await firestoreUpdateDoc(docSnap.ref, encryptedPayload);
-      console.log(`[Auto-Encryption] Automatically encrypted existing document: ${docSnap.id}`);
+      console.log(`[Auto-Encryption] Automatically encrypted legacy document in Firebase: ${docSnap.id}`);
     } catch (e) {
-      console.warn(`[Auto-Encryption] Lazy migration skip for ${docSnap.id}:`, e);
+      console.warn(`[Auto-Encryption] Skip background auto-encrypt for ${docSnap.id}:`, e);
     }
   }
 };
