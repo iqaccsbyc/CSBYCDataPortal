@@ -62,19 +62,10 @@ const EXCLUDED_FIELDS = new Set([
   'uid',
   'createdAt',
   'updatedAt',
+  'submittedAt',
   'timestamp',
-  'date',
-  'startDate',
-  'endDate',
-  'status',
-  'role',
-  'email', // optional: keep searchable if needed, or encrypt
-  'department',
   'academicYear',
-  'type',
-  'category',
-  'createdBy',
-  'stage',
+  'status',
   'isEncrypted'
 ]);
 
