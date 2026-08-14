@@ -89,12 +89,16 @@ export const getDocsEncrypted = async (queryRef) => {
   // Decrypt each document
   const docs = snapshot.docs.map(doc => {
     const rawData = doc.data();
+    const decrypted = decryptData(rawData);
     // Background lazy-migration of old data
     autoMigrateDocIfNeeded(doc);
     
     return {
       id: doc.id,
-      ...decryptData(rawData)
+      ref: doc.ref,
+      exists: () => true,
+      data: () => decrypted,
+      ...decrypted
     };
   });
 
@@ -119,7 +123,8 @@ export const getDocEncrypted = async (docRef) => {
     ...docSnap,
     data: () => decrypted,
     exists: () => true,
-    id: docSnap.id
+    id: docSnap.id,
+    ...decrypted
   };
 };
 
@@ -136,7 +141,8 @@ export const onSnapshotEncrypted = (queryOrDocRef, onNext, onError) => {
         onNext({
           ...snapshot,
           data: () => decrypted,
-          id: snapshot.id
+          id: snapshot.id,
+          ...decrypted
         });
       } else {
         onNext(snapshot);
@@ -147,10 +153,13 @@ export const onSnapshotEncrypted = (queryOrDocRef, onNext, onError) => {
     // If it's a query snapshot
     const docs = snapshot.docs.map(doc => {
       autoMigrateDocIfNeeded(doc);
+      const decrypted = decryptData(doc.data());
       return {
         id: doc.id,
-        ...decryptData(doc.data()),
-        data: () => decryptData(doc.data())
+        ref: doc.ref,
+        exists: () => true,
+        data: () => decrypted,
+        ...decrypted
       };
     });
 
@@ -161,3 +170,4 @@ export const onSnapshotEncrypted = (queryOrDocRef, onNext, onError) => {
     });
   }, onError);
 };
+

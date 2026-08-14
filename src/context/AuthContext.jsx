@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
+import { getDocEncrypted as getDoc } from '../firebase/encryptedStore'
+import { decryptData } from '../utils/encryption'
 import { auth, db } from '../firebase/config'
 
 const AuthContext = createContext(null)
@@ -18,12 +20,15 @@ export function AuthProvider({ children }) {
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.email))
           if (userDoc.exists()) {
-            const data = userDoc.data()
+            const rawData = userDoc.data()
+            const data = decryptData(rawData)
             setUser(firebaseUser)
-            const roles = data.roles || (data.role ? [data.role] : [])
+            const rawRoles = data.roles || (data.role ? [data.role] : [])
+            const rolesArray = Array.isArray(rawRoles) ? rawRoles : [rawRoles]
+            const roles = rolesArray.map(r => typeof r === 'string' ? decryptData(r) : r)
             setUserRoles(roles)
-            setFacId(data.facId)
-            setDeptCode(data.deptCode || null)
+            setFacId(data.facId ? (typeof data.facId === 'string' ? decryptData(data.facId) : data.facId) : null)
+            setDeptCode(data.deptCode ? (typeof data.deptCode === 'string' ? decryptData(data.deptCode) : data.deptCode) : null)
           } else {
             await signOut(auth)
             setUser(null)
