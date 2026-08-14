@@ -55,18 +55,35 @@ export const decryptValue = (val) => {
   }
 };
 
-// Fields that should NOT be encrypted to allow query filtering / dates / document links
+// Fields that MUST stay plaintext — either system IDs or used in Firestore WHERE queries.
+// Firestore cannot filter on encrypted values (server-side comparison fails).
 const EXCLUDED_FIELDS = new Set([
-  'id',
-  'docId',
-  'uid',
-  'createdAt',
-  'updatedAt',
-  'submittedAt',
-  'timestamp',
-  'academicYear',
-  'status',
-  'isEncrypted'
+  // Document identity
+  'id', 'docId', 'uid', 'isEncrypted',
+  // Timestamps kept as-is (Firestore Timestamp objects or ISO strings used for ordering)
+  'createdAt', 'updatedAt', 'submittedAt', 'timestamp',
+  // === Fields used in Firestore where() queries — MUST stay plaintext ===
+  'academicYear',   // where('academicYear', '==', ...)
+  'status',         // where('status', '==', ...)
+  'facStatus',      // where('facStatus', '==', 'Active')
+  'deptCode',       // where('deptCode', '==', ...)
+  'department',     // where('department', '==', ...)
+  'departmentCode', // where('departmentCode', '==', ...)
+  'submittedBy',    // where('submittedBy', '==', user.email)
+  'createdBy',      // where('createdBy', '==', ...)
+  'initiatorEmail', // where('initiatorEmail', '==', ...)
+  'assignedToEmail',// where('assignedToEmail', '==', ...)
+  'achievementFor', // where('achievementFor', '==', 'Faculty')
+  'facEmail',       // where('facEmail', '==', ...)
+  'regNo',          // where('regNo', '==', ...)
+  'programme',      // where('programme', 'in', ...)
+  'facId',          // structural reference
+  'roles',          // roles array for access control
+  'role',           // role string
+  'month',          // used for display/month calculations
+  'date',           // used for date calculations and ordering
+  'startDate',      // date field
+  'endDate',        // date field
 ]);
 
 /**

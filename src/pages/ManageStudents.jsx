@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, query, where } from 'firebase/firestore';
+import { collection, doc, deleteDoc, writeBatch, query, where } from 'firebase/firestore';
+import { getDocsEncrypted as getDocs, setDocEncrypted as setDoc } from '../firebase/encryptedStore';
+import { encryptData } from '../utils/encryption';
 import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import { hasCampusAccess } from '../utils/roleUtils';

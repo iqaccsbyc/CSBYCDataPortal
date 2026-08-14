@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { collection, getDocs, doc, setDoc, deleteDoc, query, where } from 'firebase/firestore';
+import { collection, doc, deleteDoc, query, where } from 'firebase/firestore';
+import { getDocsEncrypted as getDocs, setDocEncrypted as setDoc } from '../firebase/encryptedStore';
 import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import AddEditPhDModal from '../components/phd/AddEditPhDModal';

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, query, where } from 'firebase/firestore'
+import { getDocsEncrypted as getDocs } from '../firebase/encryptedStore'
 import { db } from '../firebase/config'
 import FacultyProfileModal from '../components/FacultyProfileModal'
 import { useAuth } from '../context/AuthContext'

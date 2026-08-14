@@ -39,9 +39,12 @@ const ALL_COLLECTIONS = [
 
 // Fields that must stay as plaintext for Firestore querying to work
 const PLAIN_FIELDS = new Set([
-  'id', 'docId', 'uid',
+  'id', 'docId', 'uid', 'isEncrypted',
   'createdAt', 'updatedAt', 'submittedAt', 'timestamp',
-  'academicYear', 'status', 'isEncrypted',
+  'academicYear', 'status', 'facStatus', 'deptCode', 'department',
+  'departmentCode', 'submittedBy', 'createdBy', 'initiatorEmail',
+  'assignedToEmail', 'achievementFor', 'facEmail', 'regNo',
+  'programme', 'facId', 'roles', 'role', 'month', 'date', 'startDate', 'endDate',
 ]);
 
 /**
@@ -73,7 +76,7 @@ function docNeedsEncryption(data) {
  * MIGRATION STATUS KEY stored in a special Firestore doc so we only run once per deployment.
  * We store the last migrated version/timestamp so repeat logins don't re-run.
  */
-const MIGRATION_VERSION = 'v4'; // bump this to force re-migration
+const MIGRATION_VERSION = 'v5'; // bump to force re-migration
 const MIGRATION_DOC = 'system/encryptionMigration';
 
 let migrationRunning = false;

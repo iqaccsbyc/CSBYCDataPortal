@@ -42,8 +42,12 @@ const autoMigrateDocIfNeeded = async (docSnap) => {
   
   // Excluded keys that stay plaintext for querying/routing
   const EXCLUDED = new Set([
-    'id', 'docId', 'uid', 'createdAt', 'updatedAt', 'submittedAt', 'timestamp', 
-    'academicYear', 'status', 'isEncrypted'
+    'id', 'docId', 'uid', 'isEncrypted',
+    'createdAt', 'updatedAt', 'submittedAt', 'timestamp',
+    'academicYear', 'status', 'facStatus', 'deptCode', 'department',
+    'departmentCode', 'submittedBy', 'createdBy', 'initiatorEmail',
+    'assignedToEmail', 'achievementFor', 'facEmail', 'regNo',
+    'programme', 'facId', 'roles', 'role', 'month', 'date', 'startDate', 'endDate',
   ]);
 
   let hasUnencryptedField = false;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, where, Timestamp } from 'firebase/firestore'
+import { collection, doc, deleteDoc, query, where, Timestamp } from 'firebase/firestore'
+import { getDocsEncrypted as getDocs, setDocEncrypted as setDoc, updateDocEncrypted as updateDoc } from '../firebase/encryptedStore'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import { hasCampusAccess } from '../utils/roleUtils'

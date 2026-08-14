@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { collection, addDoc, updateDoc, doc, query, where, onSnapshot } from 'firebase/firestore'
+import { collection, doc, query, where } from 'firebase/firestore'
+import { addDocEncrypted as addDoc, updateDocEncrypted as updateDoc, onSnapshotEncrypted as onSnapshot } from '../firebase/encryptedStore'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import TaskFormModal from '../components/TaskFormModal'

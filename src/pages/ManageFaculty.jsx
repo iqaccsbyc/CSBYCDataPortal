@@ -1,6 +1,7 @@
 import DateInput from '../components/DateInput'
 import { useState, useEffect } from 'react'
-import { collection, getDocs, doc, setDoc, deleteDoc, Timestamp, query, where } from 'firebase/firestore'
+import { collection, doc, deleteDoc, Timestamp, query, where } from 'firebase/firestore'
+import { getDocsEncrypted as getDocs, setDocEncrypted as setDoc } from '../firebase/encryptedStore'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import { ROLE_OPTIONS, hasCampusAccess } from '../utils/roleUtils'

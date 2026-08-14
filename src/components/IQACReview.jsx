@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
+import { updateDocEncrypted as updateDoc } from '../firebase/encryptedStore'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 

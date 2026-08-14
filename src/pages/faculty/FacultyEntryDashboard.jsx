@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where } from 'firebase/firestore'
+import { getDocsEncrypted as getDocs } from '../../firebase/encryptedStore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
 import { ACADEMIC_YEARS, getCurrentAcademicYear } from '../../utils/academicYear'

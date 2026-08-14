@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where } from 'firebase/firestore'
+import { getDocsEncrypted as getDocs } from '../firebase/encryptedStore'
 import { db } from '../firebase/config'
 
 export default function FacultyMultiSelect({ selected, onChange }) {
