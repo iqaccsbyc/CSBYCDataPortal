@@ -1,0 +1,167 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      let userData = get(/databases/$(database)/documents/users/$(request.auth.token.email)).data;
+      return isAuthenticated() && (
+        userData.get('role', '') == 'admin' ||
+        userData.get('roles', []).hasAny(['admin'])
+      );
+    }
+
+    function isElevatedRole() {
+      let userData = get(/databases/$(database)/documents/users/$(request.auth.token.email)).data;
+      let roleStr = userData.get('role', '');
+      let rolesArr = userData.get('roles', []);
+      return isAuthenticated() && (
+        roleStr in ['admin', 'iqac', 'hod', 'assochod', 'adminassist', 'coordinator', 'phdcoordinator', 'campusalumniteam', 'deptalumniteam'] ||
+        rolesArr.hasAny(['admin', 'iqac', 'hod', 'assochod', 'adminassist', 'coordinator', 'phdcoordinator', 'campusalumniteam', 'deptalumniteam'])
+      );
+    }
+
+    function isOwner() {
+      return isAuthenticated() && resource.data.submittedBy == request.auth.token.email;
+    }
+
+    function isOwnerCreate() {
+      return isAuthenticated() && (request.resource.data.submittedBy == request.auth.token.email || isElevatedRole());
+    }
+
+    // TEMPORARY: allow unauthenticated writes for initial seeding — re-lock after seeding
+    match /faculty/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /activities/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /publications/{docId} {
+      allow create: if isOwnerCreate();
+      allow read: if isAuthenticated();
+      allow update: if isOwner() || isElevatedRole();
+      allow delete: if isOwner() || isElevatedRole();
+    }
+
+    match /presentations/{docId} {
+      allow create: if isOwnerCreate();
+      allow read: if isAuthenticated();
+      allow update: if isOwner() || isElevatedRole();
+      allow delete: if isOwner() || isElevatedRole();
+    }
+
+    match /iprOutcomes/{docId} {
+      allow create: if isOwnerCreate();
+      allow read: if isAuthenticated();
+      allow update: if isOwner() || isElevatedRole();
+      allow delete: if isOwner() || isElevatedRole();
+    }
+
+    match /participations/{docId} {
+      allow create: if isOwnerCreate();
+      allow read: if isAuthenticated();
+      allow update: if isOwner() || isElevatedRole();
+      allow delete: if isOwner() || isElevatedRole();
+    }
+
+    match /achievements/{docId} {
+      allow create: if isOwnerCreate();
+      allow read: if isAuthenticated();
+      allow update: if isOwner() || isElevatedRole();
+      allow delete: if isOwner() || isElevatedRole();
+    }
+
+    match /projects/{docId} {
+      allow create: if isOwnerCreate();
+      allow read: if isAuthenticated();
+      allow update: if isOwner() || isElevatedRole();
+      allow delete: if isOwner() || isElevatedRole();
+    }
+
+    match /consultancy/{docId} {
+      allow create: if isOwnerCreate();
+      allow read: if isAuthenticated();
+      allow update: if isOwner() || isElevatedRole();
+      allow delete: if isOwner() || isElevatedRole();
+    }
+
+    match /incentives/{docId} {
+      allow create: if isOwnerCreate();
+      allow read: if isAuthenticated();
+      allow update: if isOwner() || isElevatedRole();
+      allow delete: if isOwner() || isElevatedRole();
+    }
+
+    match /students/{docId} {
+      // All authenticated users can read (faculty need it for disciplinary reports, viewing, etc.)
+      allow read: if isAuthenticated();
+      // Only elevated roles can write (add/edit/delete)
+      allow write: if isElevatedRole() || isAdmin();
+    }
+
+    match /placements/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    match /disciplinaryReports/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /documents/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /industryCollaborators/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /researchCollaborators/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /phdscholars/{docId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isElevatedRole() || isAdmin();
+      allow update: if isElevatedRole() || isAdmin() || 
+        (isAuthenticated() && resource.data.supervisorId == get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.get('facId', ''));
+    }
+
+    match /programmes/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isElevatedRole() || isAdmin();
+    }
+
+    match /classes/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isElevatedRole() || isAdmin();
+    }
+
+    match /tasks/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /alumni/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isElevatedRole() || isAdmin();
+    }
+
+    // TEMPORARY: allow writes for initial seeding — re-lock after seeding
+    match /users/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if true;
+    }
+
+    // TEMPORARY: allow writes for initial seeding — re-lock after seeding
+    match /departments/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
