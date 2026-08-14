@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AuthProvider } from './context/AuthContext'
+import { runFullEncryptionMigration } from './firebase/migrationService'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
@@ -36,6 +38,11 @@ import DataCleanup from './pages/DataCleanup'
 import About from './pages/About'
 
 export default function App() {
+  // Run full-database encryption migration automatically on app start
+  useEffect(() => {
+    runFullEncryptionMigration();
+  }, []);
+
   return (
     <AuthProvider>
       <BrowserRouter>
