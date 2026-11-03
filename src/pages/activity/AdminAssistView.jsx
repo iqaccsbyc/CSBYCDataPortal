@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, query, where, deleteDoc, doc } from 'firebase/firestore'
-import { onSnapshotEncrypted as onSnapshot } from '../../firebase/encryptedStore'
+import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
 import Stage1Form from './Stage1Form'

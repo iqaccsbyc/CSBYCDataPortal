@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection } from 'firebase/firestore'
-import { onSnapshotEncrypted as onSnapshot, getDocsEncrypted as getDocs } from '../../firebase/encryptedStore'
+import { collection, onSnapshot, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
 import { getAccessLevel } from '../../utils/roleUtils'

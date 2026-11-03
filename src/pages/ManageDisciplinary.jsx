@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { collection, doc, query, where, orderBy } from 'firebase/firestore';
-import { getDocsEncrypted as getDocs, setDocEncrypted as setDoc, getDocEncrypted as getDoc } from '../firebase/encryptedStore';
+import { collection, getDocs, doc, setDoc, getDoc, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import * as XLSX from 'xlsx';

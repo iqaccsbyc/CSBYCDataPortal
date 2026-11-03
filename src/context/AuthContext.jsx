@@ -1,9 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { doc } from 'firebase/firestore'
-import { getDocEncrypted as getDoc } from '../firebase/encryptedStore'
-import { decryptData } from '../utils/encryption'
+import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '../firebase/config'
+import { decryptData, restoreAllCollectionsToPlaintext } from '../utils/restorePlaintext'
 
 const AuthContext = createContext(null)
 
@@ -29,6 +28,9 @@ export function AuthProvider({ children }) {
             setUserRoles(roles)
             setFacId(data.facId ? (typeof data.facId === 'string' ? decryptData(data.facId) : data.facId) : null)
             setDeptCode(data.deptCode ? (typeof data.deptCode === 'string' ? decryptData(data.deptCode) : data.deptCode) : null)
+
+            // Trigger one-time database restoration to plain readable JSON in background
+            restoreAllCollectionsToPlaintext()
           } else {
             await signOut(auth)
             setUser(null)

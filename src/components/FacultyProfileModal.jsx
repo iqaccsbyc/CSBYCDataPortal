@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, query, or, where } from 'firebase/firestore'
-import { getDocsEncrypted as getDocs } from '../firebase/encryptedStore'
+import { collection, query, or, where, getDocs } from 'firebase/firestore'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 

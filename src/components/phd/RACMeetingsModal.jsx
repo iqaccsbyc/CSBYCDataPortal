@@ -1,7 +1,6 @@
-import DateInput from '../../components/DateInput'
+﻿import DateInput from '../../components/DateInput'
 import React, { useState, useEffect } from 'react';
-import { doc } from 'firebase/firestore';
-import { updateDocEncrypted as updateDoc } from '../../firebase/encryptedStore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 
 export default function RACMeetingsModal({ isOpen, onClose, scholar, onSaveSuccess }) {
