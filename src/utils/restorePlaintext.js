@@ -55,7 +55,7 @@ export function hasAnyEncryptedField(data) {
   return false;
 }
 
-const ALL_COLLECTIONS = [
+export const ALL_COLLECTIONS = [
   'activities',
   'achievements',
   'publications',
@@ -87,18 +87,29 @@ let restorationRunning = false;
  * Runs restoration of all collections to plain readable Firestore data.
  * Safe, idempotent, uses direct updateDoc.
  */
-export async function restoreAllCollectionsToPlaintext() {
-  if (restorationRunning) return;
+export async function restoreAllCollectionsToPlaintext(onLog) {
+  if (restorationRunning) {
+    if (onLog) onLog('Restoration is already in progress...');
+    return;
+  }
   restorationRunning = true;
 
-  console.log('[Plaintext Restoration] Checking collections for encrypted fields...');
+  const log = (msg) => {
+    console.log(`[Plaintext Restoration] ${msg}`);
+    if (onLog) onLog(msg);
+  };
+
+  log('Starting full database plaintext restoration...');
 
   let totalRestored = 0;
 
   for (const colName of ALL_COLLECTIONS) {
     try {
       const snap = await getDocs(collection(db, colName));
-      if (snap.empty) continue;
+      if (snap.empty) {
+        log(`Collection '${colName}': empty or no documents`);
+        continue;
+      }
 
       let colRestored = 0;
       for (const docSnap of snap.docs) {
@@ -116,17 +127,20 @@ export async function restoreAllCollectionsToPlaintext() {
       }
 
       if (colRestored > 0) {
-        console.log(`[Plaintext Restoration] Restored ${colRestored} document(s) in '${colName}'`);
+        log(`✓ Restored ${colRestored} document(s) in '${colName}'`);
+      } else {
+        log(`Collection '${colName}': already clean plaintext (${snap.size} docs)`);
       }
     } catch (err) {
-      console.warn(`[Plaintext Restoration] Skipping '${colName}':`, err.message);
+      log(`Skipped '${colName}': ${err.message}`);
     }
   }
 
   restorationRunning = false;
   if (totalRestored > 0) {
-    console.log(`[Plaintext Restoration] Done! Restored ${totalRestored} document(s) across all collections.`);
+    log(`All Done! Successfully restored ${totalRestored} document(s) across all collections.`);
   } else {
-    console.log('[Plaintext Restoration] All collections are already 100% clean plaintext.');
+    log('All collections are already 100% clean plaintext!');
   }
+  return totalRestored;
 }
