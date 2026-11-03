@@ -1,5 +1,5 @@
 import CryptoJS from 'crypto-js';
-import { collection, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const SECRET_KEY = import.meta.env.VITE_DATA_ENCRYPTION_KEY || 'CSBYC_DATA_PORTAL_SECURE_KEY_2026';
@@ -84,60 +84,49 @@ const ALL_COLLECTIONS = [
 let restorationRunning = false;
 
 /**
- * Runs one-time restoration of all collections to plain readable Firestore data.
- * Safe, idempotent, and stops running once completed.
+ * Runs restoration of all collections to plain readable Firestore data.
+ * Safe, idempotent, uses direct updateDoc.
  */
 export async function restoreAllCollectionsToPlaintext() {
   if (restorationRunning) return;
-  if (localStorage.getItem('csbyc_db_plaintext_restored') === 'true') {
-    return;
-  }
-
   restorationRunning = true;
+
   console.log('[Plaintext Restoration] Checking collections for encrypted fields...');
 
   let totalRestored = 0;
-  let hadAnyEncrypted = false;
 
   for (const colName of ALL_COLLECTIONS) {
     try {
       const snap = await getDocs(collection(db, colName));
       if (snap.empty) continue;
 
-      let batch = writeBatch(db);
-      let batchCount = 0;
-
+      let colRestored = 0;
       for (const docSnap of snap.docs) {
         const rawData = docSnap.data();
         if (!hasAnyEncryptedField(rawData)) continue;
 
-        hadAnyEncrypted = true;
         const plainData = decryptData(rawData);
         if ('isEncrypted' in plainData) {
           delete plainData.isEncrypted;
         }
 
-        batch.set(docSnap.ref, plainData);
-        batchCount++;
+        await updateDoc(docSnap.ref, plainData);
+        colRestored++;
         totalRestored++;
-
-        if (batchCount >= 400) {
-          await batch.commit();
-          batch = writeBatch(db);
-          batchCount = 0;
-        }
       }
 
-      if (batchCount > 0) {
-        await batch.commit();
-        console.log(`[Plaintext Restoration] Restored ${batchCount} document(s) in '${colName}'`);
+      if (colRestored > 0) {
+        console.log(`[Plaintext Restoration] Restored ${colRestored} document(s) in '${colName}'`);
       }
     } catch (err) {
-      console.warn(`[Plaintext Restoration] Collection '${colName}':`, err.message);
+      console.warn(`[Plaintext Restoration] Skipping '${colName}':`, err.message);
     }
   }
 
   restorationRunning = false;
-  localStorage.setItem('csbyc_db_plaintext_restored', 'true');
-  console.log(`[Plaintext Restoration] Done! Restored ${totalRestored} document(s) across all collections.`);
+  if (totalRestored > 0) {
+    console.log(`[Plaintext Restoration] Done! Restored ${totalRestored} document(s) across all collections.`);
+  } else {
+    console.log('[Plaintext Restoration] All collections are already 100% clean plaintext.');
+  }
 }
